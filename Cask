@@ -29,4 +29,10 @@
 
 ;; Emacs Helm https://github.com/emacs-helm/helm
 (depends-on "helm")
+
+;; Projectile
+(depends-on "projectile")
+(depends-on "helm-projectile")
 (depends-on "helm-ag")
+
+(depends-on "ocodo-svg-modelines")

@@ -1,7 +1,9 @@
+#+OPTIONS: H:2
+#+STARTUP: indent
+#+PROPERTY: header-args :results silent
 #+TITLE:   Literal Programming for Emacs Configure
 #+author:  Jianming Qu
-#+OPTIONS: H:2
-#+PROPERTY: header-args :results silent
+
 
 * High level solution
 - Dependency and package management
@@ -42,9 +44,12 @@
     (global-superword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作一个 word
     (delete-selection-mode 1) ;; 粘贴后取消选择
     (global-auto-revert-mode 1) ;; 当外部变更文档后自动更新当前文档
+    (electric-indent-mode t) ;; 文档自动缩进
+    (linum-mode t) ;; 显示行号
 
     (setq-default auto-save-default nil ;; 关闭 Auto-save
                   indent-tabs-mode nil ;; 使用空格代替 tab
+                  ring-bell-function 'ignore ;; 关闭 alarm bell
                   org-cycle-emulate-tab 'white ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
                   make-backup-files nil) ;; 关闭自动创建备份文件
 #+END_SRC
@@ -54,12 +59,18 @@
 #+BEGIN_SRC emacs-lisp
   (load-theme 'sanityinc-tomorrow-blue t) ;; 修改主题
   (set-frame-parameter (selected-frame) 'alpha '(95 . 80)) ;; 设置背景透明, 分别为 Emacs active 和 unactive 时的透明度
-  (set-background-color "#000620") ;; 加深背景颜色
+  (set-background-color "#000620") ;; 加深背景颜色 (为了使背景颜色应用到所有 mode 需要修改theme文件中的背景颜色)
 
   (set-default-font "Envy Code R") ;; 修改默认字体
   (set-face-attribute 'default nil :height 200) ;; 修改默认字体缩放大小
   (tool-bar-mode -1) ;; 关闭上方的工具栏
   (scroll-bar-mode -1) ;; 关闭右侧的滚动条
+  (show-paren-mode t) ;; 高亮显示 pair 的括号
+  (ocodo-svg-modelines-init)
+  (smt/set-theme 'ocodo-meshq-aqua-smt)
+
+  (setq split-width-threshold 1
+        split-height-threshold nil) ;; 设置默认分屏为垂直分屏
 #+END_SRC
 
 
@@ -83,22 +94,23 @@
 #+END_SRC
 
 #+TBLNAME: mkeys
-| Keys          | Command                     | Category | Description                                                |
-|---------------+-----------------------------+----------+------------------------------------------------------------|
-| M-q           | 'save-buffers-kill-terminal | General  | Kill emacs                                                 |
-| M-z           | 'undo                       | General  | Undo                                                       |
-| M-S-z         | 'redo                       | General  | Redo                                                       |
-| C-M-<return>  | 'set-mark-command           | General  | Set mark                                                   |
-| C-x <return>  | 'pop-to-mark-command        | General  | Jump back                                                  |
-| M-<backspace> | 'kill-whole-line            | General  | Kill whole line                                            |
-| M-k           | 'delete-other-windows       | General  | Only keep the current window                               |
-| M-c           | 'kill-ring-save             | General  | Copy region or current line                                |
-| C-8           | 'er/expand-region           | General  | Expand select                                              |
-| M-x           | 'helm-M-x                   | Helm     | Using helm command buffer instead of native command buffer |
-| C-c h m       | 'helm-imenu                 | Helm     | Show the document menu in mini buffer                      |
-| C-s           | 'helm-occur                 | Helm     | Search the text in current doc by giving in mini buffer    |
-| C-x C-f       | 'helm-find-files            | Helm     | Find file by showing the candidates in mini buffer         |
-| M-y           | 'helm-show-kill-ring        | Helm     | Yank by showing the clipboard in mini buffer               |
+| Keys          | Command                     | Category  | Description                                                |
+|---------------+-----------------------------+-----------+------------------------------------------------------------|
+| M-q           | 'save-buffers-kill-terminal | General   | Kill emacs                                                 |
+| M-z           | 'undo                       | General   | Undo                                                       |
+| M-S-z         | 'redo                       | General   | Redo                                                       |
+| C-M-<return>  | 'set-mark-command           | General   | Set mark                                                   |
+| C-x <return>  | 'pop-to-mark-command        | General   | Jump back                                                  |
+| M-<backspace> | 'kill-whole-line            | General   | Kill whole line                                            |
+| M-k           | 'delete-other-windows       | General   | Only keep the current window                               |
+| M-c           | 'kill-ring-save             | General   | Copy region or current line                                |
+| C-8           | 'er/expand-region           | General   | Expand select                                              |
+| M-x           | 'helm-M-x                   | Helm      | Using helm command buffer instead of native command buffer |
+| C-c h m       | 'helm-imenu                 | Helm      | Show the document menu in mini buffer                      |
+| M-s           | 'helm-occur                 | Helm      | Search the text in current doc by giving in mini buffer    |
+| C-x C-f       | 'helm-find-files            | Helm      | Find file by showing the candidates in mini buffer         |
+| M-y           | 'helm-show-kill-ring        | Helm      | Yank by showing the clipboard in mini buffer               |
+| <f7>          | 'toggle-window-split        | Customize | Toggle the split window between vertical and horizontal    |
 
 - Key translation
 #+NAME: trans-keys
@@ -138,5 +150,47 @@
   (helm-autoresize-mode t)
 #+END_SRC
 
+*** Projectile
+
+#+BEGIN_SRC emacs-lisp
+  (projectile-global-mode)
+  (helm-projectile-on)
+#+END_SRC
+
 
 ** Lauguage aspect
+*** Org
+#+BEGIN_SRC emacs-lisp
+  (org-indent-mode t)
+#+END_SRC
+
+
+* Customise
+** Toggle window split
+#+BEGIN_SRC emacs-lisp
+  (defun toggle-window-split ()
+    (interactive)
+    (if (= (count-windows) 2)
+        (let* ((this-win-buffer (window-buffer))
+               (next-win-buffer (window-buffer (next-window)))
+               (this-win-edges (window-edges (selected-window)))
+               (next-win-edges (window-edges (next-window)))
+               (this-win-2nd (not (and (<= (car this-win-edges)
+                                           (car next-win-edges))
+                                       (<= (cadr this-win-edges)
+                                           (cadr next-win-edges)))))
+               (splitter
+                (if (= (car this-win-edges)
+                       (car (window-edges (next-window))))
+                    'split-window-horizontally
+                  'split-window-vertically)))
+          (delete-other-windows)
+          (let ((first-win (selected-window)))
+            (funcall splitter)
+            (if this-win-2nd (other-window 1))
+            (set-window-buffer (selected-window) this-win-buffer)
+            (set-window-buffer (next-window) next-win-buffer)
+            (select-window first-win)
+            (if this-win-2nd (other-window 1))))))
+#+END_SRC
+
