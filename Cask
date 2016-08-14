@@ -35,4 +35,10 @@
 (depends-on "helm-projectile")
 (depends-on "helm-ag")
 
+;; Svg mode line
 (depends-on "ocodo-svg-modelines")
+
+;; Company
+(depends-on "company")
+(depends-on "tern")
+(depends-on "company-tern")

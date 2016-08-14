@@ -4,7 +4,6 @@
 #+TITLE:   Literal Programming for Emacs Configure
 #+author:  Jianming Qu
 
-
 * High level solution
 - Dependency and package management
   - 使用 Cask & Pallet 管理 Emacs 的依赖. (Pallet 用来自动同步在 Emacs 中安装的依赖到 Cask 文件中)
@@ -17,7 +16,7 @@
   - 描述文件: [[./init.el][init.el]]
 
 
-* General configration
+* General configuration
 - Initialization
   + Cask loading <<cask-loading>>
 #+BEGIN_SRC emacs-lisp :tangle no :eval never
@@ -41,17 +40,23 @@
 
 - 编辑设置
 #+BEGIN_SRC emacs-lisp
-    (global-superword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作一个 word
-    (delete-selection-mode 1) ;; 粘贴后取消选择
-    (global-auto-revert-mode 1) ;; 当外部变更文档后自动更新当前文档
-    (electric-indent-mode t) ;; 文档自动缩进
-    (linum-mode t) ;; 显示行号
+  (global-superword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作一个 word
+  (delete-selection-mode 1) ;; 粘贴后取消选择
+  (global-auto-revert-mode 1) ;; 当外部变更文档后自动更新当前文档
+  (electric-indent-mode t) ;; 文档自动缩进
+  (global-linum-mode t) ;; 显示行号
 
-    (setq-default auto-save-default nil ;; 关闭 Auto-save
-                  indent-tabs-mode nil ;; 使用空格代替 tab
-                  ring-bell-function 'ignore ;; 关闭 alarm bell
-                  org-cycle-emulate-tab 'white ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
-                  make-backup-files nil) ;; 关闭自动创建备份文件
+  (setq-default auto-save-default nil ;; 关闭 Auto-save
+                auto-save-list-file-prefix nil ;; 停止创建 auto-save-list 文件夹
+                indent-tabs-mode nil ;; 使用空格代替 tab
+                ring-bell-function 'ignore ;; 关闭 alarm bell
+                org-cycle-emulate-tab 'white ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
+                make-backup-files nil) ;; 关闭自动创建备份文件
+
+  (defalias 'yes-or-no-p 'y-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
+  (setq kill-buffer-query-functions
+        (remq 'process-kill-buffer-query-function
+              kill-buffer-query-functions)) ;; 取消关闭文件时的确认
 #+END_SRC
 
 
@@ -66,11 +71,13 @@
   (tool-bar-mode -1) ;; 关闭上方的工具栏
   (scroll-bar-mode -1) ;; 关闭右侧的滚动条
   (show-paren-mode t) ;; 高亮显示 pair 的括号
-  (ocodo-svg-modelines-init)
-  (smt/set-theme 'ocodo-meshq-aqua-smt)
 
   (setq split-width-threshold 1
         split-height-threshold nil) ;; 设置默认分屏为垂直分屏
+
+  (ocodo-svg-modelines-init) ;; 渲染 mode-line
+  (smt/set-theme 'ocodo-mesh-aqua-smt) ;; 设置 mode-line 主题
+
 #+END_SRC
 
 
@@ -157,11 +164,48 @@
   (helm-projectile-on)
 #+END_SRC
 
+*** Company
+Complete anything. Emacs 自动补全插件.
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'after-init-hook 'global-company-mode)
+  (with-eval-after-load 'company
+    (add-to-list 'company-backends 'company-files t))
+#+END_SRC
 
-** Lauguage aspect
+*** Ispell & Flyspell
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load 'company
+    (add-to-list 'company-backends 'company-ispell t))
+  (add-hook 'org-mode-hook 'flyspell-mode)
+#+END_SRC
+
+** Language aspect
 *** Org
 #+BEGIN_SRC emacs-lisp
   (org-indent-mode t)
+#+END_SRC
+
+**** Source block template
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'org-structure-template-alist '("e" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC\n"))
+  (add-to-list 'org-structure-template-alist '("j" "#+BEGIN_SRC js\n?\n#+END_SRC\n"))
+  (add-to-list 'org-structure-template-alist '("S" "#+BEGIN_SRC scheme\n?\n#+END_SRC\n"))
+  (add-to-list 'org-structure-template-alist '("s" "#+BEGIN_SRC scala\n?\n#+END_SRC\n"))
+  (add-to-list 'org-structure-template-alist '("sh" "#+BEGIN_SRC shell-script\n?\n#+END_SRC\n"))
+  (add-to-list 'org-structure-template-alist '("r" "#+BEGIN_SRC ruby\n?\n#+END_SRC\n"))
+  (add-to-list 'org-structure-template-alist '("h" "#+BEGIN_SRC haskell\n?\n#+END_SRC\n"))
+#+END_SRC
+
+*** Emacs-lisp
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+*** JavaScript
+**** Tern
+Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern server, 通过中间件与 emacs 通信, 实现 JS 代码补全和跳转.
+#+BEGIN_SRC emacs-lisp
+  (with-eval-after-load 'company
+    (add-to-list 'company-backends 'company-tern))
 #+END_SRC
 
 
@@ -194,3 +238,17 @@
             (if this-win-2nd (other-window 1))))))
 #+END_SRC
 
+** sudo-editor
+#+BEGIN_SRC emacs-lisp
+(defun sudo-edit (&optional arg)
+  "Edit currently visited file as root.
+
+With a prefix ARG prompt for a file to visit.
+Will also prompt for a file to visit if current
+buffer is not visiting a file."
+  (interactive "P")
+  (if (or arg (not buffer-file-name))
+      (find-file (concat "/sudo:root@localhost:"
+                         (ido-read-file-name "Find file(as root): ")))
+    (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+#+END_SRC
