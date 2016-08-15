@@ -42,3 +42,9 @@
 (depends-on "company")
 (depends-on "tern")
 (depends-on "company-tern")
+
+;; Pager
+(depends-on "pager")
+
+;; On-screen
+(depends-on "on-screen")

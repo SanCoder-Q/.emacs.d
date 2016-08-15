@@ -18,6 +18,8 @@
       (remq 'process-kill-buffer-query-function
             kill-buffer-query-functions)) ;; 取消关闭文件时的确认
 
+(require 'pager) ;; 使用 pager.el 代替系统的翻页, 需要在 key map 里替换
+
 (load-theme 'sanityinc-tomorrow-blue t) ;; 修改主题
 (set-frame-parameter (selected-frame) 'alpha '(95 . 80)) ;; 设置背景透明, 分别为 Emacs active 和 unactive 时的透明度
 (set-background-color "#000620") ;; 加深背景颜色 (为了使背景颜色应用到所有 mode 需要修改theme文件中的背景颜色)
@@ -33,6 +35,9 @@
 
 (ocodo-svg-modelines-init) ;; 渲染 mode-line
 (smt/set-theme 'ocodo-mesh-aqua-smt) ;; 设置 mode-line 主题
+
+(on-screen-global-mode 1) ;; 翻页的事后加一条小黑线
+(setq on-screen-highlight-method 'narrow-line)
 
 (when (eq system-type 'darwin)
   (setq mac-option-modifier 'super)
@@ -53,6 +58,8 @@
 (global-set-key (kbd "C-x C-f") 'helm-find-files)
 (global-set-key (kbd "M-y") 'helm-show-kill-ring)
 (global-set-key (kbd "<f7>") 'toggle-window-split)
+(global-set-key (kbd "C-v") 'pager-page-down)
+(global-set-key (kbd "M-v") 'pager-page-up)
 
 (keyboard-translate ?\C-h ?\C-?)
 
