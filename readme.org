@@ -200,7 +200,7 @@ Complete anything. Emacs 自动补全插件.
 #+BEGIN_SRC emacs-lisp 
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-code-indent-offset 2)
-  (setq js2-basic-offset 2))
+  (setq js2-basic-offset 2)
 #+END_SRC
 
 

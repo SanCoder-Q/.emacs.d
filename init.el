@@ -14,6 +14,7 @@
 ;; Org config loading
 (require 'org)
 (setq org-confirm-babel-evaluate nil)
+(setq vc-follow-symlinks nil)
 (org-babel-load-file "~/.emacs.d/readme.org")
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
