@@ -13,7 +13,6 @@
               org-cycle-emulate-tab 'white ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
               make-backup-files nil) ;; 关闭自动创建备份文件
 
-(defalias 'yes-or-no-p 'y-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
 (setq kill-buffer-query-functions
       (remq 'process-kill-buffer-query-function
             kill-buffer-query-functions)) ;; 取消关闭文件时的确认
@@ -52,6 +51,7 @@
 (global-set-key (kbd "M-k") 'delete-other-windows)
 (global-set-key (kbd "M-c") 'kill-ring-save)
 (global-set-key (kbd "C-8") 'er/expand-region)
+(global-set-key (kbd "C-x b") 'helm-for-files)
 (global-set-key (kbd "M-x") 'helm-M-x)
 (global-set-key (kbd "C-c h m") 'helm-imenu)
 (global-set-key (kbd "M-s") 'helm-occur)
@@ -60,6 +60,9 @@
 (global-set-key (kbd "<f7>") 'toggle-window-split)
 (global-set-key (kbd "C-v") 'pager-page-down)
 (global-set-key (kbd "M-v") 'pager-page-up)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-*") 'mc/mark-all-like-this)
 
 (keyboard-translate ?\C-h ?\C-?)
 
@@ -80,20 +83,36 @@
   (add-to-list 'company-backends 'company-ispell t))
 (add-hook 'org-mode-hook 'flyspell-mode)
 
+(require 'editorconfig)
+
 (org-indent-mode t)
 
-(add-to-list 'org-structure-template-alist '("e" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC\n"))
-(add-to-list 'org-structure-template-alist '("j" "#+BEGIN_SRC js\n?\n#+END_SRC\n"))
-(add-to-list 'org-structure-template-alist '("S" "#+BEGIN_SRC scheme\n?\n#+END_SRC\n"))
-(add-to-list 'org-structure-template-alist '("s" "#+BEGIN_SRC scala\n?\n#+END_SRC\n"))
-(add-to-list 'org-structure-template-alist '("sh" "#+BEGIN_SRC shell-script\n?\n#+END_SRC\n"))
-(add-to-list 'org-structure-template-alist '("r" "#+BEGIN_SRC ruby\n?\n#+END_SRC\n"))
-(add-to-list 'org-structure-template-alist '("h" "#+BEGIN_SRC haskell\n?\n#+END_SRC\n"))
+(add-to-list 'org-structure-template-alist '("e" "#+BEGIN_SRC emacs-lisp \n?\n#+END_SRC\n"))
+(add-to-list 'org-structure-template-alist '("j" "#+BEGIN_SRC js \n?\n#+END_SRC\n"))
+(add-to-list 'org-structure-template-alist '("s" "#+BEGIN_SRC scala \n?\n#+END_SRC\n"))
+(add-to-list 'org-structure-template-alist '("r" "#+BEGIN_SRC ruby \n?\n#+END_SRC\n"))
+(add-to-list 'org-structure-template-alist '("h" "#+BEGIN_SRC haskell \n?\n#+END_SRC\n"))
+(add-to-list 'org-structure-template-alist '("S" "#+BEGIN_SRC scheme \n?\n#+END_SRC\n"))
+(add-to-list 'org-structure-template-alist '("sh" "#+BEGIN_SRC shell-script \n?\n#+END_SRC\n"))
 
+(define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
 
+(add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
 
 (with-eval-after-load 'company
   (add-to-list 'company-backends 'company-tern))
+
+(add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+(add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
+
+(add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-mode))
+
+(add-to-list 'auto-mode-alist '("\\.sbt\\'" . scala-mode))
+(add-to-list 'auto-mode-alist '("\\.sc\\'" . scala-mode))
+(add-to-list 'auto-mode-alist '("\\.scala\\'" . scala-mode))
+
+;; (require 'ensime)
+;; (add-hook 'scala-mode-hook 'ensime-mode)
 
 (defun toggle-window-split ()
   (interactive)
@@ -131,3 +150,66 @@ buffer is not visiting a file."
       (find-file (concat "/sudo:root@localhost:"
                          (ido-read-file-name "Find file(as root): ")))
     (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+
+(defun y-ret-or-n-p (prompt)
+  (let ((answer 'recenter)
+        (padded (lambda (prompt &optional dialog)
+                  (let ((l (length prompt)))
+                    (concat prompt
+                            (if (or (zerop l) (eq ?\s (aref prompt (1- l))))
+                                "" " ")
+                            (if dialog "" "(y or n) "))))))
+    (cond
+     (noninteractive
+      (setq prompt (funcall padded prompt))
+      (let ((temp-prompt prompt))
+        (while (not (memq answer '(act skip)))
+          (let ((str (read-string temp-prompt)))
+            (cond ((member str '("" "y" "Y")) (setq answer 'act))
+                  ((member str '("n" "N")) (setq answer 'skip))
+                  (t (setq temp-prompt (concat "Please answer y [RET] or n.  "
+                                               prompt))))))))
+     ((and (display-popup-menus-p)
+           last-input-event             ; not during startup
+           (listp last-nonmenu-event)
+           use-dialog-box)
+      (setq prompt (funcall padded prompt t)
+            answer (x-popup-dialog t `(,prompt ("Yes" . act) ("No" . skip)))))
+     (t
+      (setq prompt (funcall padded prompt))
+      (while
+          (let* ((scroll-actions '(recenter scroll-up scroll-down
+                                            scroll-other-window scroll-other-window-down))
+                 (key
+                  (let ((cursor-in-echo-area t))
+                    (when minibuffer-auto-raise
+                      (raise-frame (window-frame (minibuffer-window))))
+                    (read-key (propertize (if (memq answer scroll-actions)
+                                              prompt
+                                            (concat "Please answer y [RET] or n.  "
+                                                    prompt))
+                                          'face 'minibuffer-prompt)))))
+            (setq answer (lookup-key query-replace-map (vector key) t))
+            (cond
+             ((memq answer '(skip act exit)) nil)
+             ((eq answer 'recenter)
+              (recenter) t)
+             ((eq answer 'scroll-up)
+              (ignore-errors (scroll-up-command)) t)
+             ((eq answer 'scroll-down)
+              (ignore-errors (scroll-down-command)) t)
+             ((eq answer 'scroll-other-window)
+              (ignore-errors (scroll-other-window)) t)
+             ((eq answer 'scroll-other-window-down)
+              (ignore-errors (scroll-other-window-down)) t)
+             ((or (memq answer '(exit-prefix quit)) (eq key ?\e))
+              (signal 'quit nil) t)
+             (t t)))
+        (ding)
+        (discard-input))))
+    (let ((ret (memq answer '(act exit))))
+      (unless noninteractive
+        (message "%s%c" prompt (if ret ?y ?n)))
+      ret)))
+
+(defalias 'yes-or-no-p 'y-ret-or-n-p) ;; 转换 yes/no 问题为 y/n 问题

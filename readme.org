@@ -1,5 +1,6 @@
 #+OPTIONS: H:2
 #+STARTUP: indent
+#+STARTUP: showall
 #+PROPERTY: header-args :results silent
 #+TITLE:   Literal Programming for Emacs Configure
 #+author:  Jianming Qu
@@ -53,7 +54,6 @@
                 org-cycle-emulate-tab 'white ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
                 make-backup-files nil) ;; 关闭自动创建备份文件
 
-  (defalias 'yes-or-no-p 'y-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
   (setq kill-buffer-query-functions
         (remq 'process-kill-buffer-query-function
               kill-buffer-query-functions)) ;; 取消关闭文件时的确认
@@ -116,7 +116,9 @@
 | M-<backspace> | 'kill-whole-line            | General   | Kill whole line                                            |
 | M-k           | 'delete-other-windows       | General   | Only keep the current window                               |
 | M-c           | 'kill-ring-save             | General   | Copy region or current line                                |
+| C-7           | 'er/contract-region         | General   | Shrink select                                              |
 | C-8           | 'er/expand-region           | General   | Expand select                                              |
+| C-x b         | 'helm-for-files             | Helm      | Using helm buffer                                          |
 | M-x           | 'helm-M-x                   | Helm      | Using helm command buffer instead of native command buffer |
 | C-c h m       | 'helm-imenu                 | Helm      | Show the document menu in mini buffer                      |
 | M-s           | 'helm-occur                 | Helm      | Search the text in current doc by giving in mini buffer    |
@@ -125,6 +127,9 @@
 | <f7>          | 'toggle-window-split        | Customize | Toggle the split window between vertical and horizontal    |
 | C-v           | 'pager-page-down            | Pager     | Using pager.el instead of native page scroll               |
 | M-v           | 'pager-page-up              | Pager     | Using pager.el instead of native page scroll               |
+| C-<           | 'mc/mark-previous-like-this | M-Cursor  | Multiple select above                                      |
+| C->           | 'mc/mark-next-like-this     | M-Cursor  | Multiple select below                                      |
+| C-*           | 'mc/mark-all-like-this      | M-Cursor  | Multiple select all                                        |
 
 - Key translation
 #+NAME: trans-keys
@@ -185,6 +190,20 @@ Complete anything. Emacs 自动补全插件.
   (add-hook 'org-mode-hook 'flyspell-mode)
 #+END_SRC
 
+*** Editorconfig
+#+BEGIN_SRC emacs-lisp 
+  (require 'editorconfig)
+  (editorconfig-mode 1)
+#+END_SRC
+
+*** Indent Setting
+#+BEGIN_SRC emacs-lisp 
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-code-indent-offset 2)
+  (setq js2-basic-offset 2))
+#+END_SRC
+
+
 ** Language aspect
 *** Org
 #+BEGIN_SRC emacs-lisp
@@ -192,18 +211,42 @@ Complete anything. Emacs 自动补全插件.
 #+END_SRC
 
 **** Source block template
-#+BEGIN_SRC emacs-lisp
-  (add-to-list 'org-structure-template-alist '("e" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC\n"))
-  (add-to-list 'org-structure-template-alist '("j" "#+BEGIN_SRC js\n?\n#+END_SRC\n"))
-  (add-to-list 'org-structure-template-alist '("S" "#+BEGIN_SRC scheme\n?\n#+END_SRC\n"))
-  (add-to-list 'org-structure-template-alist '("s" "#+BEGIN_SRC scala\n?\n#+END_SRC\n"))
-  (add-to-list 'org-structure-template-alist '("sh" "#+BEGIN_SRC shell-script\n?\n#+END_SRC\n"))
-  (add-to-list 'org-structure-template-alist '("r" "#+BEGIN_SRC ruby\n?\n#+END_SRC\n"))
-  (add-to-list 'org-structure-template-alist '("h" "#+BEGIN_SRC haskell\n?\n#+END_SRC\n"))
+#+NAME: src-tmpl
+#+BEGIN_SRC emacs-lisp :var srcmap=src-alias :results output :tangle no :exports none :colnames nil
+    (mapcar (lambda (l)
+              (let* ((alias (car l))
+                     (source (car (cdr l)))
+                     (args (car (last l)))
+                     (tmpl (format "(\"%s\" \"#+BEGIN_SRC %s %s\\n?\\n#+END_SRC\\n\")" alias source args)))
+                (princ (format "(add-to-list 'org-structure-template-alist '%s)\n" tmpl))))
+            srcmap)
+#+END_SRC
+
+#+TBLNAME: src-alias
+| Alias | Actual source | Header arguments |
+|-------+---------------+------------------|
+| e     | emacs-lisp    |                  |
+| j     | js            |                  |
+| s     | scala         |                  |
+| r     | ruby          |                  |
+| h     | haskell       |                  |
+| S     | scheme        |                  |
+| sh    | shell-script  |                  |
+
+#+BEGIN_SRC emacs-lisp :noweb yes :exports none
+  <<src-tmpl()>>
 #+END_SRC
 
 *** Emacs-lisp
 #+BEGIN_SRC emacs-lisp
+  (define-key emacs-lisp-mode-map (kbd "C-c C-c") 'eval-buffer)
+#+END_SRC
+
+*** HTML
+#+BEGIN_SRC emacs-lisp 
+  (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
+  (eval-after-load "web-mode"
+    '(setq web-mode-enable-auto-expanding t))
 #+END_SRC
 
 *** JavaScript
@@ -214,8 +257,33 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
     (add-to-list 'company-backends 'company-tern))
 #+END_SRC
 
+**** js2-mode
+#+BEGIN_SRC emacs-lisp 
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
+#+END_SRC
 
-* Customise
+*** C#
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.cs\\'" . csharp-mode))
+#+END_SRC
+
+*** Scala
+**** scala-mode
+#+BEGIN_SRC emacs-lisp 
+  (add-to-list 'auto-mode-alist '("\\.sbt\\'" . scala-mode))
+  (add-to-list 'auto-mode-alist '("\\.sc\\'" . scala-mode))
+  (add-to-list 'auto-mode-alist '("\\.scala\\'" . scala-mode))
+#+END_SRC
+
+**** ensime
+#+BEGIN_SRC emacs-lisp 
+  ;; (require 'ensime)
+  ;; (add-hook 'scala-mode-hook 'ensime-mode)
+#+END_SRC
+
+
+* Customize
 ** Toggle window split
 #+BEGIN_SRC emacs-lisp
   (defun toggle-window-split ()
@@ -257,5 +325,72 @@ buffer is not visiting a file."
       (find-file (concat "/sudo:root@localhost:"
                          (ido-read-file-name "Find file(as root): ")))
     (find-alternate-file (concat "/sudo:root@localhost:" buffer-file-name))))
+#+END_SRC
+
+** y-ret-or-n-p
+#+BEGIN_SRC emacs-lisp 
+  (defun y-ret-or-n-p (prompt)
+    (let ((answer 'recenter)
+          (padded (lambda (prompt &optional dialog)
+                    (let ((l (length prompt)))
+                      (concat prompt
+                              (if (or (zerop l) (eq ?\s (aref prompt (1- l))))
+                                  "" " ")
+                              (if dialog "" "(y [RET] or n) "))))))
+      (cond
+       (noninteractive
+        (setq prompt (funcall padded prompt))
+        (let ((temp-prompt prompt))
+          (while (not (memq answer '(act skip)))
+            (let ((str (read-string temp-prompt)))
+              (cond ((member str '("" "y" "Y")) (setq answer 'act))
+                    ((member str '("n" "N")) (setq answer 'skip))
+                    (t (setq temp-prompt (concat "Please answer y [RET] or n.  "
+                                                 prompt))))))))
+       ((and (display-popup-menus-p)
+             last-input-event             ; not during startup
+             (listp last-nonmenu-event)
+             use-dialog-box)
+        (setq prompt (funcall padded prompt t)
+              answer (x-popup-dialog t `(,prompt ("Yes" . act) ("No" . skip)))))
+       (t
+        (setq prompt (funcall padded prompt))
+        (while
+            (let* ((scroll-actions '(recenter scroll-up scroll-down
+                                              scroll-other-window scroll-other-window-down))
+                   (key
+                    (let ((cursor-in-echo-area t))
+                      (when minibuffer-auto-raise
+                        (raise-frame (window-frame (minibuffer-window))))
+                      (read-key (propertize (if (memq answer scroll-actions)
+                                                prompt
+                                              (concat "Please answer y [RET] or n.  "
+                                                      prompt))
+                                            'face 'minibuffer-prompt)))))
+              (setq answer (lookup-key query-replace-map (vector key) t))
+              (cond
+               ((memq answer '(skip act exit)) nil)
+               ((eq answer 'recenter)
+                (recenter) t)
+               ((eq answer 'scroll-up)
+                (ignore-errors (scroll-up-command)) t)
+               ((eq answer 'scroll-down)
+                (ignore-errors (scroll-down-command)) t)
+               ((eq answer 'scroll-other-window)
+                (ignore-errors (scroll-other-window)) t)
+               ((eq answer 'scroll-other-window-down)
+                (ignore-errors (scroll-other-window-down)) t)
+               ((or (memq answer '(exit-prefix quit)) (eq key ?\e))
+                (signal 'quit nil) t)
+               (t t)))
+          (ding)
+          (discard-input))))
+      (let ((ret (memq answer '(act exit))))
+        (unless noninteractive
+          (message "%s%c" prompt (if ret ?y ?n)))
+        ret)))
+
+  (defalias 'yes-or-no-p 'y-ret-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
+  (defalias 'y-or-n-p 'y-ret-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
 #+END_SRC
 

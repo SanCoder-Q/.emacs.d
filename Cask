@@ -48,3 +48,21 @@
 
 ;; On-screen
 (depends-on "on-screen")
+
+;; Multiple-Cursors
+(depends-on "multiple-cursors")
+
+;; Editor Config
+(depends-on "editorconfig")
+
+;; csharp-mode
+(depends-on "csharp-mode")
+
+;; js2-mode
+(depends-on "js2-mode")
+
+;; web-mode
+(depends-on "web-mode")
+
+;; scala-mode
+(depends-on "scala-mode")
