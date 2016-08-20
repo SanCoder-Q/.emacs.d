@@ -1,20 +1,21 @@
-#+OPTIONS: H:2
 #+STARTUP: indent
 #+STARTUP: showall
 #+PROPERTY: header-args :results silent
 #+TITLE:   Literal Programming for Emacs Configure
 #+author:  Jianming Qu
 
+Ever since I used Emacs, I was using the config template from my friend [[http://blog.oyanglul.us][Ouyang Jichao]] without truely understand everything. That why I started to reconfig all the settings. Now I have a quite different configuration file, and I am happy to share it to the public.
+
 * High level solution
 - Dependency and package management
   - 使用 Cask & Pallet 管理 Emacs 的依赖. (Pallet 用来自动同步在 Emacs 中安装的依赖到 Cask 文件中)
-  - 描述文件: [[./Cask][Cask]]
+  - 描述文件: [[https://github.com/SanCoder-Q/.emacs.d/blob/master/Cask][Cask]]
 
 - Bootstrap
   - 步骤:
     1. [[cask-loading][通过初始化 Cask 加载依赖]]
     2. [[org-config-loading][初始化 org-mode, 利用 org-babel 将本文中的配置导出为 config.el 文件并 evaluate.]]
-  - 描述文件: [[./init.el][init.el]]
+  - 描述文件: [[https://github.com/SanCoder-Q/.emacs.d/blob/master/init.el][init.el]]
 
 
 * General configuration
@@ -51,7 +52,6 @@
                 auto-save-list-file-prefix nil ;; 停止创建 auto-save-list 文件夹
                 indent-tabs-mode nil ;; 使用空格代替 tab
                 ring-bell-function 'ignore ;; 关闭 alarm bell
-                org-cycle-emulate-tab 'white ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
                 make-backup-files nil) ;; 关闭自动创建备份文件
 
   (setq kill-buffer-query-functions
@@ -87,7 +87,7 @@
 
 
 * Key modification
-- Meta key 设为 =Command= （我用的是mac）[[(meta-key)]]
+- Meta key 设为 =Command=
 #+BEGIN_SRC emacs-lisp
   (when (eq system-type 'darwin)
     (setq mac-option-modifier 'super)
@@ -208,6 +208,13 @@ Complete anything. Emacs 自动补全插件.
 *** Org
 #+BEGIN_SRC emacs-lisp
   (org-indent-mode t)
+  (setq org-use-sub-superscripts '{}) ;; 显式的使用A_{B}来表示B是A的角标
+  (setq org-export-with-sub-superscripts '{}) ;; 显式的使用A_{B}来表示B是A的角标
+  (setq-default org-cycle-emulate-tab 'white) ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
+  (add-hook 'org-mode-hook 'visual-line-mode) ;; 回行
+  (set-face-attribute 'org-level-1 nil :height 1.6 :bold t)
+  (set-face-attribute 'org-level-2 nil :height 1.4 :bold t)
+  (set-face-attribute 'org-level-3 nil :height 1.2 :bold t)
 #+END_SRC
 
 **** Source block template
@@ -236,6 +243,29 @@ Complete anything. Emacs 自动补全插件.
 #+BEGIN_SRC emacs-lisp :noweb yes :exports none
   <<src-tmpl()>>
 #+END_SRC
+
+**** Publish
+Emacs 2.5 需要单独安装 htmlize 来支持代码发布的语法高亮功能!
+
+#+BEGIN_SRC emacs-lisp
+  (setq org-html-validation-link nil)
+  (setq org-export-html-coding-system 'utf-8-unix)
+  (setq org-publish-use-timestamps-flag nil) ;; 每次重新发布html
+  (setq org-publish-project-alist
+        '(("blog"
+           :base-directory "~/Dev/blog/sancoder-q.github.io/_org/"
+           :base-extension "org"
+           :publishing-directory "~/Dev/blog/sancoder-q.github.io/_posts"
+           :html-extension "org.html"
+           :sub-superscript "{}"
+           :htmlized-source t
+           :recursive t
+           :publishing-function org-html-publish-to-html
+           :section-numbers 4
+           :with-toc nil
+           :body-only t)))
+#+END_SRC
+
 
 *** Emacs-lisp
 #+BEGIN_SRC emacs-lisp

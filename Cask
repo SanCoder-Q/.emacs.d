@@ -66,3 +66,6 @@
 
 ;; scala-mode
 (depends-on "scala-mode")
+
+;; htmlize
+(depends-on "htmlize")
