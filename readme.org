@@ -40,6 +40,12 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
   (server-start)
 #+END_SRC
 
+- 配置可执行程序 Path
+#+BEGIN_SRC emacs-lisp 
+  (add-to-list 'exec-path "/usr/local/bin")
+#+END_SRC
+
+
 - 编辑设置
 #+BEGIN_SRC emacs-lisp
   (global-superword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作一个 word
@@ -191,13 +197,13 @@ Complete anything. Emacs 自动补全插件.
 #+END_SRC
 
 *** Editorconfig
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (require 'editorconfig)
   (editorconfig-mode 1)
 #+END_SRC
 
 *** Indent Setting
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-code-indent-offset 2)
   (setq js2-basic-offset 2)
@@ -273,7 +279,7 @@ Emacs 2.5 需要单独安装 htmlize 来支持代码发布的语法高亮功能!
 #+END_SRC
 
 *** HTML
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.html?\\'" . web-mode))
   (eval-after-load "web-mode"
     '(setq web-mode-enable-auto-expanding t))
@@ -288,7 +294,7 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
 #+END_SRC
 
 **** js2-mode
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
 #+END_SRC
@@ -300,14 +306,14 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
 
 *** Scala
 **** scala-mode
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.sbt\\'" . scala-mode))
   (add-to-list 'auto-mode-alist '("\\.sc\\'" . scala-mode))
   (add-to-list 'auto-mode-alist '("\\.scala\\'" . scala-mode))
 #+END_SRC
 
 **** ensime
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   ;; (require 'ensime)
   ;; (add-hook 'scala-mode-hook 'ensime-mode)
 #+END_SRC
@@ -358,7 +364,7 @@ buffer is not visiting a file."
 #+END_SRC
 
 ** y-ret-or-n-p
-#+BEGIN_SRC emacs-lisp 
+#+BEGIN_SRC emacs-lisp
   (defun y-ret-or-n-p (prompt)
     (let ((answer 'recenter)
           (padded (lambda (prompt &optional dialog)
@@ -423,4 +429,3 @@ buffer is not visiting a file."
   (defalias 'yes-or-no-p 'y-ret-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
   (defalias 'y-or-n-p 'y-ret-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
 #+END_SRC
-
