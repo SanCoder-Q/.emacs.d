@@ -24,7 +24,9 @@
  '(org-agenda-files nil)
  '(package-selected-packages
    (quote
-    (htmlize web-mode scala-mode pallet pager org-plus-contrib on-screen ocodo-svg-modelines multiple-cursors js2-mode helm-projectile helm-ag expand-region editorconfig csharp-mode company-tern color-theme-sanityinc-tomorrow))))
+    (yaml-mode htmlize web-mode scala-mode pallet pager org-plus-contrib on-screen ocodo-svg-modelines multiple-cursors js2-mode helm-projectile helm-ag expand-region editorconfig csharp-mode company-tern color-theme-sanityinc-tomorrow)))
+ '(tab-width 2)
+ '(web-mode-css-indent-offset 2))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

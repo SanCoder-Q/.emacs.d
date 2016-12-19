@@ -124,6 +124,9 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 | M-c           | 'kill-ring-save             | General   | Copy region or current line                                |
 | C-7           | 'er/contract-region         | General   | Shrink select                                              |
 | C-8           | 'er/expand-region           | General   | Expand select                                              |
+| C-/           | 'comment-line               | General   | Comment                                                    |
+| C-c C-r       | 'revert-buffer              | General   | Reload current file                                        |
+| C-a           | 'back-to-indentation        | General   | Jump to the first character of the line.                   |
 | C-x b         | 'helm-for-files             | Helm      | Using helm buffer                                          |
 | M-x           | 'helm-M-x                   | Helm      | Using helm command buffer instead of native command buffer |
 | C-c h m       | 'helm-imenu                 | Helm      | Show the document menu in mini buffer                      |
@@ -162,7 +165,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 * User Settings
 用户设置, 放一些不想密码或敏感内容
 #+BEGIN_SRC emacs-lisp
- (when (file-readable-p ".user.el") (load ".user.el"))
+   (when (file-readable-p ".user.el") (load ".user.el"))
 #+END_SRC
 
 
@@ -204,10 +207,28 @@ Complete anything. Emacs 自动补全插件.
 
 *** Indent Setting
 #+BEGIN_SRC emacs-lisp
+  (setq tab-width 4)
   (setq web-mode-markup-indent-offset 2)
   (setq web-mode-code-indent-offset 2)
   (setq js2-basic-offset 2)
+  (add-hook 'scss-mode-hook '(lambda () (setq tab-width 2)))
 #+END_SRC
+
+*** Auto Insert
+#+BEGIN_SRC emacs-lisp
+  (require 'autoinsert)
+  (auto-insert-mode t)
+  (define-auto-insert
+    '("\\.org\\'" . "org")
+    '("results (silent|replace): "
+      "#+STARTUP: indent" \n
+      "#+STARTUP: showall" \n
+      "#+PROPERTY: header-args :results " str | "replace" \n \n
+      "#+TITLE: " (skeleton-read "Your title: ") \n
+      "#+author: Jianming Qu" \n \n
+      _))
+#+END_SRC
+
 
 
 ** Language aspect
@@ -221,6 +242,12 @@ Complete anything. Emacs 自动补全插件.
   (set-face-attribute 'org-level-1 nil :height 1.6 :bold t)
   (set-face-attribute 'org-level-2 nil :height 1.4 :bold t)
   (set-face-attribute 'org-level-3 nil :height 1.2 :bold t)
+#+END_SRC
+
+**** Quote block
+#+BEGIN_SRC emacs-lisp 
+  (add-to-list 'org-structure-template-alist
+               "(\"q\"\"#+BEGIN_QUOTE\\n?\\n#+END_QUOTE\\n\")")
 #+END_SRC
 
 **** Source block template
@@ -285,6 +312,12 @@ Emacs 2.5 需要单独安装 htmlize 来支持代码发布的语法高亮功能!
     '(setq web-mode-enable-auto-expanding t))
 #+END_SRC
 
+*** JSON
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.json\\'" . web-mode))
+#+END_SRC
+
+
 *** JavaScript
 **** Tern
 Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern server, 通过中间件与 emacs 通信, 实现 JS 代码补全和跳转.
@@ -318,6 +351,10 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
   ;; (add-hook 'scala-mode-hook 'ensime-mode)
 #+END_SRC
 
+*** Fish
+#+BEGIN_SRC emacs-lisp 
+  (add-hook 'fish-mode-hook '(lambda () (setq tab-width 2)))
+#+END_SRC
 
 * Customize
 ** Toggle window split

@@ -2,12 +2,36 @@
 (source melpa)
 (source org)
 
+(depends-on "cask")
+(depends-on "color-theme-sanityinc-tomorrow")
+(depends-on "company")
+(depends-on "company-tern")
+(depends-on "csharp-mode")
 (depends-on "dash")
+(depends-on "editorconfig")
 (depends-on "epl")
+(depends-on "expand-region")
 (depends-on "f")
+(depends-on "helm")
+(depends-on "helm-ag")
+(depends-on "helm-projectile")
+(depends-on "htmlize")
+(depends-on "js2-mode")
+(depends-on "multiple-cursors")
+(depends-on "ocodo-svg-modelines")
+(depends-on "on-screen")
+(depends-on "org")
+(depends-on "org-plus-contrib")
 (depends-on "package-build")
+(depends-on "pager")
+(depends-on "pallet")
+(depends-on "projectile")
 (depends-on "s")
-
+(depends-on "scala-mode")
+(depends-on "shut-up")
+(depends-on "tern")
+(depends-on "web-mode")
+(depends-on "yaml-mode")
 ;;;pallet-ignore
 
 ;; Cask & Pallet: Dependency management tools for outside and inside emacs
@@ -66,6 +90,15 @@
 
 ;; scala-mode
 (depends-on "scala-mode")
+
+;; yaml-mode
+(depends-on "yaml-mode")
+
+;; fish-mode
+(depends-on "fish-mode")
+
+;; mustache-mode
+(depends-on "mustache-mode")
 
 ;; htmlize
 (depends-on "htmlize")
