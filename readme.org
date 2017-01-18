@@ -73,7 +73,6 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
   (load-theme 'sanityinc-tomorrow-blue t) ;; 修改主题
   (set-frame-parameter (selected-frame) 'alpha '(95 . 80)) ;; 设置背景透明, 分别为 Emacs active 和 unactive 时的透明度
   (set-background-color "#000620") ;; 加深背景颜色 (为了使背景颜色应用到所有 mode 需要修改theme文件中的背景颜色)
-
   (set-default-font "Envy Code R") ;; 修改默认字体
   (set-face-attribute 'default nil :height 200) ;; 修改默认字体缩放大小
   (tool-bar-mode -1) ;; 关闭上方的工具栏
@@ -244,11 +243,24 @@ Complete anything. Emacs 自动补全插件.
   (set-face-attribute 'org-level-3 nil :height 1.2 :bold t)
 #+END_SRC
 
-**** Quote block
-#+BEGIN_SRC emacs-lisp 
-  (add-to-list 'org-structure-template-alist
-               "(\"q\"\"#+BEGIN_QUOTE\\n?\\n#+END_QUOTE\\n\")")
+**** org block template
+#+NAME: block-tmpl
+#+BEGIN_SRC emacs-lisp :var blockmap=block-alias :results output :tangle no :exports none :colnames nil
+    (mapcar (lambda (l)
+              (let* ((alias (car l))
+                     (block (car (cdr l)))
+                     (args (car (last l)))
+                     (tmpl (format "(\"%s\" \"#+BEGIN_%s %s\\n?\\n#+END_SRC\\n\")" alias block args)))
+                (princ (format "(add-to-list 'org-structure-template-alist '%s)\n" tmpl))))
+            blockmap)
 #+END_SRC
+
+#+TBLNAME: block-alias
+| Alias | Actual source | Header arguments |
+|-------+---------------+------------------|
+| no    | NOTES         |                  |
+| q     | QUOTE         |                  |
+
 
 **** Source block template
 #+NAME: src-tmpl
@@ -284,6 +296,7 @@ Emacs 2.5 需要单独安装 htmlize 来支持代码发布的语法高亮功能!
   (setq org-html-validation-link nil)
   (setq org-export-html-coding-system 'utf-8-unix)
   (setq org-publish-use-timestamps-flag nil) ;; 每次重新发布html
+  (setq org-export-with-special-strings nil) ;; 关闭特殊字符转换,orgmode 8.2.6
   (setq org-publish-project-alist
         '(("blog"
            :base-directory "~/Dev/blog/sancoder-q.github.io/_org/"
@@ -326,10 +339,10 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
     (add-to-list 'company-backends 'company-tern))
 #+END_SRC
 
-**** js2-mode
+**** web-mode
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'auto-mode-alist '("\\.js\\'" . js2-mode))
-  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . js2-jsx-mode))
+  (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
+  (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
 #+END_SRC
 
 *** C#
@@ -465,4 +478,13 @@ buffer is not visiting a file."
 
   (defalias 'yes-or-no-p 'y-ret-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
   (defalias 'y-or-n-p 'y-ret-or-n-p) ;; 转换 yes/no 问题为 y/n 问题
+#+END_SRC
+
+** Scratch
+#+BEGIN_SRC emacs-lisp 
+(defun create-scratch-buffer nil
+   "create a scratch buffer"
+   (interactive)
+   (switch-to-buffer (get-buffer-create "*scratch*"))
+   (lisp-interaction-mode))
 #+END_SRC

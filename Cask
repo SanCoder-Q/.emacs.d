@@ -2,6 +2,7 @@
 (source melpa)
 (source org)
 
+(depends-on "async")
 (depends-on "cask")
 (depends-on "color-theme-sanityinc-tomorrow")
 (depends-on "company")
@@ -12,15 +13,17 @@
 (depends-on "epl")
 (depends-on "expand-region")
 (depends-on "f")
+(depends-on "fish-mode")
 (depends-on "helm")
 (depends-on "helm-ag")
+(depends-on "helm-core")
 (depends-on "helm-projectile")
 (depends-on "htmlize")
 (depends-on "js2-mode")
 (depends-on "multiple-cursors")
+(depends-on "mustache-mode")
 (depends-on "ocodo-svg-modelines")
 (depends-on "on-screen")
-(depends-on "org")
 (depends-on "org-plus-contrib")
 (depends-on "package-build")
 (depends-on "pager")
@@ -42,8 +45,9 @@
 (depends-on "shut-up") 
 
 ;; Org support
-(depends-on "org")
+;;(depends-on "org")
 (depends-on "org-plus-contrib")
+(depends-on "ox-reveal")
 
 ;; Expand region: Increasingly select region until it selects what you want.
 (depends-on "expand-region")
