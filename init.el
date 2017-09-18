@@ -5,8 +5,7 @@
 ;; just comment it out by adding a semicolon to the start of the line.
 ;; You may delete these explanatory comments.
 (package-initialize)
-
-(require 'cask "/usr/local/Cellar/cask/0.7.2_1/cask.el")
+(require 'cask "/usr/local/opt/cask/cask.el")
 (cask-initialize)
 (require 'pallet)
 (pallet-mode t)

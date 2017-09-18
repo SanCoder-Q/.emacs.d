@@ -43,8 +43,13 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 - 配置可执行程序 Path
 #+BEGIN_SRC emacs-lisp 
   (add-to-list 'exec-path "/usr/local/bin")
+  (setenv "PATH" (concat "/usr/local/bin:" (getenv "PATH")))
 #+END_SRC
 
+- 配置 Debug 模式
+#+BEGIN_SRC emacs-lisp 
+(setq debug-on-error t)
+#+END_SRC
 
 - 编辑设置
 #+BEGIN_SRC emacs-lisp
@@ -71,7 +76,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 * Style configuration
 #+BEGIN_SRC emacs-lisp
   (load-theme 'sanityinc-tomorrow-blue t) ;; 修改主题
-  (set-frame-parameter (selected-frame) 'alpha '(95 . 80)) ;; 设置背景透明, 分别为 Emacs active 和 unactive 时的透明度
+  (set-frame-parameter (selected-frame) 'alpha '(85 . 60)) ;; 设置背景透明, 分别为 Emacs active 和 unactive 时的透明度
   (set-background-color "#000620") ;; 加深背景颜色 (为了使背景颜色应用到所有 mode 需要修改theme文件中的背景颜色)
   (set-default-font "Envy Code R") ;; 修改默认字体
   (set-face-attribute 'default nil :height 200) ;; 修改默认字体缩放大小
@@ -82,8 +87,11 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
   (setq split-width-threshold 1
         split-height-threshold nil) ;; 设置默认分屏为垂直分屏
 
-  (ocodo-svg-modelines-init) ;; 渲染 mode-line
-  (smt/set-theme 'ocodo-mesh-aqua-smt) ;; 设置 mode-line 主题
+  ;; (ocodo-svg-modelines-init) ;; 渲染 mode-line
+  ;; (smt/set-theme 'ocodo-mesh-aqua-smt) ;; 设置 mode-line 主题
+  (setq sml/theme 'dark) ;; 配置 mode-line 主题
+  (setq sml/no-confirm-load-theme t) ;; 避免每次启动的 prompt
+  (sml/setup)  ;; 启动 mode-line 插件 smart mode line
 
   (on-screen-global-mode 1) ;; 翻页的事后加一条小黑线
   (setq on-screen-highlight-method 'narrow-line)
@@ -117,7 +125,6 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 | M-z           | 'undo                       | General   | Undo                                                       |
 | M-S-z         | 'redo                       | General   | Redo                                                       |
 | C-M-<return>  | 'set-mark-command           | General   | Set mark                                                   |
-| C-x <return>  | 'pop-to-mark-command        | General   | Jump back                                                  |
 | M-<backspace> | 'kill-whole-line            | General   | Kill whole line                                            |
 | M-k           | 'delete-other-windows       | General   | Only keep the current window                               |
 | M-c           | 'kill-ring-save             | General   | Copy region or current line                                |
@@ -125,10 +132,14 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 | C-8           | 'er/expand-region           | General   | Expand select                                              |
 | C-/           | 'comment-line               | General   | Comment                                                    |
 | C-c C-r       | 'revert-buffer              | General   | Reload current file                                        |
+| M-[           | 'pop-to-mark-command        | General   | Jump back to last marker                                   |
+| M-]           | 'unpop-to-mark-command      | General   | Jump forward to next marker                                |
 | C-a           | 'back-to-indentation        | General   | Jump to the first character of the line.                   |
+| C-'           | 'helm-all-mark-rings        | General   | Show all mark ring                                         |
 | C-x b         | 'helm-for-files             | Helm      | Using helm buffer                                          |
 | M-x           | 'helm-M-x                   | Helm      | Using helm command buffer instead of native command buffer |
 | C-c h m       | 'helm-imenu                 | Helm      | Show the document menu in mini buffer                      |
+| C-c h h       | 'helm-help                  | Helm      | Show the help document                                     |
 | M-s           | 'helm-occur                 | Helm      | Search the text in current doc by giving in mini buffer    |
 | C-x C-f       | 'helm-find-files            | Helm      | Find file by showing the candidates in mini buffer         |
 | M-y           | 'helm-show-kill-ring        | Helm      | Yank by showing the clipboard in mini buffer               |
@@ -312,6 +323,12 @@ Emacs 2.5 需要单独安装 htmlize 来支持代码发布的语法高亮功能!
            :body-only t)))
 #+END_SRC
 
+**** org node
+#+BEGIN_SRC emacs-lisp 
+  (setq org-babel-js-cmd "node --harmony --use_strict")
+#+END_SRC
+
+
 
 *** Emacs-lisp
 #+BEGIN_SRC emacs-lisp
@@ -326,8 +343,9 @@ Emacs 2.5 需要单独安装 htmlize 来支持代码发布的语法高亮功能!
 #+END_SRC
 
 *** JSON
+以下会导致打开较大文件时加载时间过长
 #+BEGIN_SRC emacs-lisp
-  (add-to-list 'auto-mode-alist '("\\.json\\'" . web-mode))
+  ;; (add-to-list 'auto-mode-alist '("\\.json\\'" . web-mode))
 #+END_SRC
 
 
@@ -337,6 +355,12 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
 #+BEGIN_SRC emacs-lisp
   (with-eval-after-load 'company
     (add-to-list 'company-backends 'company-tern))
+  (add-hook 'web-mode-hook (lambda () (tern-mode t)))
+#+END_SRC
+
+**** flow-for-emacs
+#+BEGIN_SRC emacs-lisp 
+  (add-hook 'web-mode-hook (lambda () (load-file "~/.emacs.d/flow-for-emacs/flow.el")))
 #+END_SRC
 
 **** web-mode
@@ -362,6 +386,20 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
 #+BEGIN_SRC emacs-lisp
   ;; (require 'ensime)
   ;; (add-hook 'scala-mode-hook 'ensime-mode)
+#+END_SRC
+
+**** markdown-mode
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
+#+END_SRC
+
+*** Coq
+#+BEGIN_SRC emacs-lisp
+  ;; Open .v files with Proof General's Coq mode
+  (load "~/.emacs.d/lisp/PG/generic/proof-site")
+  ;; Load company-coq when opening Coq files
+  (add-hook 'coq-mode-hook #'company-coq-mode)
+  (setq coq-prog-name "/usr/local/bin/coqtop")
 #+END_SRC
 
 *** Fish
@@ -487,4 +525,19 @@ buffer is not visiting a file."
    (interactive)
    (switch-to-buffer (get-buffer-create "*scratch*"))
    (lisp-interaction-mode))
+#+END_SRC
+
+** Unpop-to-mark
+#+BEGIN_SRC emacs-lisp 
+  (defun unpop-to-mark-command ()
+    "Unpop off mark ring. Does nothing if mark ring is empty."
+    (interactive)
+    (when mark-ring
+      (let ((pos (marker-position (car (last mark-ring)))))
+        (if (not (= (point) pos))
+            (goto-char pos)
+          (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
+          (set-marker (mark-marker) pos)
+          (setq mark-ring (nbutlast mark-ring))
+          (goto-char (marker-position (car (last mark-ring))))))))
 #+END_SRC

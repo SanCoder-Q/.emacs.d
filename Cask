@@ -6,25 +6,28 @@
 (depends-on "cask")
 (depends-on "color-theme-sanityinc-tomorrow")
 (depends-on "company")
+(depends-on "company-coq")
 (depends-on "company-tern")
 (depends-on "csharp-mode")
 (depends-on "dash")
 (depends-on "editorconfig")
-(depends-on "epl")
 (depends-on "expand-region")
 (depends-on "f")
 (depends-on "fish-mode")
+(depends-on "gist")
 (depends-on "helm")
 (depends-on "helm-ag")
 (depends-on "helm-core")
 (depends-on "helm-projectile")
 (depends-on "htmlize")
 (depends-on "js2-mode")
+(depends-on "magit")
+(depends-on "markdown-mode")
 (depends-on "multiple-cursors")
 (depends-on "mustache-mode")
-(depends-on "ocodo-svg-modelines")
 (depends-on "on-screen")
 (depends-on "org-plus-contrib")
+(depends-on "ox-reveal")
 (depends-on "package-build")
 (depends-on "pager")
 (depends-on "pallet")
@@ -32,6 +35,7 @@
 (depends-on "s")
 (depends-on "scala-mode")
 (depends-on "shut-up")
+(depends-on "smart-mode-line")
 (depends-on "tern")
 (depends-on "web-mode")
 (depends-on "yaml-mode")
@@ -57,6 +61,7 @@
 
 ;; Emacs Helm https://github.com/emacs-helm/helm
 (depends-on "helm")
+(depends-on "helm-core")
 
 ;; Projectile
 (depends-on "projectile")
@@ -64,7 +69,10 @@
 (depends-on "helm-ag")
 
 ;; Svg mode line
-(depends-on "ocodo-svg-modelines")
+;; (depends-on "ocodo-svg-modelines")
+
+;; Sart mode line
+(depends-on "smart-mode-line")
 
 ;; Company
 (depends-on "company")
@@ -106,3 +114,15 @@
 
 ;; htmlize
 (depends-on "htmlize")
+
+;; markdown
+(depends-on "markdown-mode")
+
+;; magit
+(depends-on "magit")
+
+;; coq
+(depends-on "company-coq")
+
+;; gist
+(depends-on "gist")
