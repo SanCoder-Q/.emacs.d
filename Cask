@@ -24,7 +24,6 @@
 (depends-on "magit")
 (depends-on "markdown-mode")
 (depends-on "multiple-cursors")
-(depends-on "mustache-mode")
 (depends-on "on-screen")
 (depends-on "org-plus-contrib")
 (depends-on "ox-reveal")
@@ -103,6 +102,12 @@
 ;; scala-mode
 (depends-on "scala-mode")
 
+;; haskell-mode
+(depends-on "haskell-mode")
+
+;; intero
+(depends-on "intero")
+
 ;; yaml-mode
 (depends-on "yaml-mode")
 
@@ -110,7 +115,7 @@
 (depends-on "fish-mode")
 
 ;; mustache-mode
-(depends-on "mustache-mode")
+(depends-on "mustache-mode" :git "https://github.com/mustache/emacs.git" :files ("*.el"))
 
 ;; htmlize
 (depends-on "htmlize")
@@ -126,3 +131,19 @@
 
 ;; gist
 (depends-on "gist")
+
+;; visual-regexp
+(depends-on "visual-regexp")
+
+;; graphviz-dot-mode
+(depends-on "graphviz-dot-mode")
+
+;; org-R
+(depends-on "ess")
+
+;; pure script
+(depends-on "purescript-mode")
+(depends-on "psc-ide")
+
+;; yasnippet
+(depends-on "yasnippet")

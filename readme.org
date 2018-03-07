@@ -48,13 +48,15 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 
 - 配置 Debug 模式
 #+BEGIN_SRC emacs-lisp 
-(setq debug-on-error t)
+(setq debug-on-error nil)
 #+END_SRC
 
 - 编辑设置
 #+BEGIN_SRC emacs-lisp
+  ;;(global-subword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作两个 word
   (global-superword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作一个 word
-  (delete-selection-mode 1) ;; 粘贴后取消选择
+  (delete-selection-mode 1) ;; 粘贴后取消选择2
+
   (global-auto-revert-mode 1) ;; 当外部变更文档后自动更新当前文档
   (electric-indent-mode t) ;; 文档自动缩进
   (global-linum-mode t) ;; 显示行号
@@ -70,6 +72,12 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
               kill-buffer-query-functions)) ;; 取消关闭文件时的确认
 
   (require 'pager) ;; 使用 pager.el 代替系统的翻页, 需要在 key map 里替换
+  (require 'visual-regexp) ;; 启用 vr (带高亮的文本替换)
+
+
+  (when (eq system-type 'darwin) ;; Mac's ls doesn't support '--dired' and will throw an error
+    (require 'ls-lisp)
+    (setq ls-lisp-use-insert-directory-program nil))
 #+END_SRC
 
 
@@ -89,6 +97,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 
   ;; (ocodo-svg-modelines-init) ;; 渲染 mode-line
   ;; (smt/set-theme 'ocodo-mesh-aqua-smt) ;; 设置 mode-line 主题
+  (column-number-mode t) ;; 在 mode-line 显示当前列
   (setq sml/theme 'dark) ;; 配置 mode-line 主题
   (setq sml/no-confirm-load-theme t) ;; 避免每次启动的 prompt
   (sml/setup)  ;; 启动 mode-line 插件 smart mode line
@@ -122,6 +131,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 | Keys          | Command                     | Category  | Description                                                |
 |---------------+-----------------------------+-----------+------------------------------------------------------------|
 | M-q           | 'save-buffers-kill-terminal | General   | Kill emacs                                                 |
+| C-x C-c       | 'delete-frame               | General   | Kill emacs frame                                           |
 | M-z           | 'undo                       | General   | Undo                                                       |
 | M-S-z         | 'redo                       | General   | Redo                                                       |
 | C-M-<return>  | 'set-mark-command           | General   | Set mark                                                   |
@@ -132,6 +142,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 | C-8           | 'er/expand-region           | General   | Expand select                                              |
 | C-/           | 'comment-line               | General   | Comment                                                    |
 | C-c C-r       | 'revert-buffer              | General   | Reload current file                                        |
+| C-c r         | 'vr-replace-whole-buffer    | General   | Visual regexp replace                                      |
 | M-[           | 'pop-to-mark-command        | General   | Jump back to last marker                                   |
 | M-]           | 'unpop-to-mark-command      | General   | Jump forward to next marker                                |
 | C-a           | 'back-to-indentation        | General   | Jump to the first character of the line.                   |
@@ -239,6 +250,14 @@ Complete anything. Emacs 自动补全插件.
       _))
 #+END_SRC
 
+*** Halve the window two to one
+#+BEGIN_SRC emacs-lisp 
+(defun halve-other-window-width ()
+  (interactive)
+  (enlarge-window-horizontally (/ (window-width (next-window)) 2)))
+
+(global-set-key (kbd "C-x _") 'halve-other-window-width)
+#+END_SRC
 
 
 ** Language aspect
@@ -367,7 +386,28 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'auto-mode-alist '("\\.js\\'" . web-mode))
   (add-to-list 'auto-mode-alist '("\\.jsx\\'" . web-mode))
+  (add-hook 'web-mode-hook
+            (lambda ()
+              ;; short circuit js mode and just do everything in jsx-mode
+              (if (equal web-mode-content-type "javascript")
+                  (web-mode-set-content-type "jsx")
+                (message "now set to: %s" web-mode-content-type))))
 #+END_SRC
+
+*** Pure Script
+
+#+BEGIN_SRC emacs-lisp 
+  (require 'psc-ide)
+  (add-hook 'purescript-mode-hook
+            (lambda ()
+              (psc-ide-mode)
+              (company-mode)
+              (flycheck-mode)
+              (turn-on-purescript-indentation)
+              (setq psc-ide-use-npm-bin t)))
+
+#+END_SRC
+
 
 *** C#
 #+BEGIN_SRC emacs-lisp
@@ -393,6 +433,11 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
   (add-to-list 'auto-mode-alist '("\\.md\\'" . markdown-mode))
 #+END_SRC
 
+*** Haskell
+#+BEGIN_SRC emacs-lisp 
+  (add-hook 'haskell-mode-hook 'intero-mode)
+#+END_SRC
+
 *** Coq
 #+BEGIN_SRC emacs-lisp
   ;; Open .v files with Proof General's Coq mode
@@ -405,6 +450,11 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
 *** Fish
 #+BEGIN_SRC emacs-lisp 
   (add-hook 'fish-mode-hook '(lambda () (setq tab-width 2)))
+#+END_SRC
+
+*** Graphviz Dot 
+#+BEGIN_SRC emacs-lisp 
+  (add-to-list 'org-src-lang-modes '("dot" . graphviz-dot))
 #+END_SRC
 
 * Customize
@@ -541,3 +591,60 @@ buffer is not visiting a file."
           (setq mark-ring (nbutlast mark-ring))
           (goto-char (marker-position (car (last mark-ring))))))))
 #+END_SRC
+
+** Visual-Regexp
+#+BEGIN_SRC emacs-lisp 
+(defun vr-replace-whole-buffer () 
+  (interactive)
+  (save-excursion
+    (beginning-of-buffer)
+    (call-interactively 'vr/replace)))
+#+END_SRC
+
+** Smart forward and backward
+#+BEGIN_SRC emacs-lisp 
+  (defun jmqu/test-backward-kill-word ()
+    "Smart kill word backward."
+    (interactive)
+    (backword-char))
+  (global-set-key [C-backspace]
+                  'jmqu/test-backward-kill-word)
+#+END_SRC
+
+
+
+#+BEGIN_SRC emacs-lisp 
+  (defun jmqu/backward-kill-word ()
+    "Smart kill word backward."
+    (interactive)
+    (let* ((cp (point)) ;; save current point
+           (backword)   ;; define 
+           (end)        ;; define 
+           (space-pos)  ;; define
+           (backword-char (if (bobp) ;; save the character before current point
+                              "" ;; if buffer beginning
+                            (buffer-substring cp (- cp 1)))))
+      (if (equal (length backword-char) (string-width backword-char)) ;; if it is an Ascii character
+          (progn
+            (save-excursion
+              (setq backword (buffer-substring (point) (progn (forward-word -1) (point)))))
+            (setq ab/debug backword)
+            (save-excursion
+              (when (and backword          ;; when backword contains space
+                         (s-contains? " " backword))
+                (setq space-pos (ignore-errors (search-backward " ")))))
+            (save-excursion
+              (let* ((pos (ignore-errors (search-backward-regexp "\n")))
+                     (substr (when pos (buffer-substring pos cp))))
+                (when (or (and substr (s-blank? (s-trim substr)))
+                          (s-contains? "\n" backword))
+                  (setq end pos))))
+            (if end
+                (kill-region cp end)
+              (if space-pos
+                  (kill-region cp space-pos)
+                (backward-kill-word 1))))
+        (kill-region cp (- cp 1)))         ;; word is non-english word
+      ))
+#+END_SRC
+

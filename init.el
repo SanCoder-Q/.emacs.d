@@ -24,6 +24,9 @@
  '(package-selected-packages
    (quote
     (yaml-mode htmlize web-mode scala-mode pallet pager org-plus-contrib on-screen ocodo-svg-modelines multiple-cursors js2-mode helm-projectile helm-ag expand-region editorconfig csharp-mode company-tern color-theme-sanityinc-tomorrow)))
+ '(safe-local-variable-values
+   (quote
+    ((intero-targets "helloworld:lib" "helloworld:test:helloworld-test"))))
  '(tab-width 2)
  '(web-mode-css-indent-offset 2))
 (custom-set-faces
@@ -32,3 +35,4 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+(put 'upcase-region 'disabled nil)
