@@ -270,8 +270,11 @@ Complete anything. Emacs 自动补全插件.
 
 *** Yasnippet
 #+BEGIN_SRC emacs-lisp 
-(require 'yasnippet)
-(yas-global-mode 1)
+  (require 'yasnippet)
+  (yas-global-mode 1)
+  (add-hook 'yas-minor-mode-hook
+            (lambda ()
+              (yas-activate-extra-mode 'fundamental-mode)))
 #+END_SRC
 
 ** Language aspect

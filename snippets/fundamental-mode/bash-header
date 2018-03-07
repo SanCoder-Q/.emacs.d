@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# contributor: sancoder.q@gmail.com
+# name: bash-header
+# key: bash-header
+# --
+
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
