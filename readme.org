@@ -136,6 +136,10 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 | M-S-z         | 'redo                       | General   | Redo                                                       |
 | C-M-<return>  | 'set-mark-command           | General   | Set mark                                                   |
 | M-<backspace> | 'kill-whole-line            | General   | Kill whole line                                            |
+| C-<backspace> | 'jmqu/backward-kill-word    | General   | Kill the word backward                                     |
+| M-d           | 'jmqu/forward-kill-word     | General   | Kill the word forward                                      |
+| M-b           | 'jmqu/backward-word         | General   | Move to the word backward                                  |
+| M-f           | 'jmqu/forward-word          | General   | Move to the word forward                                   |
 | M-k           | 'delete-other-windows       | General   | Only keep the current window                               |
 | M-c           | 'kill-ring-save             | General   | Copy region or current line                                |
 | C-7           | 'er/contract-region         | General   | Shrink select                                              |
@@ -259,6 +263,10 @@ Complete anything. Emacs 自动补全插件.
 (global-set-key (kbd "C-x _") 'halve-other-window-width)
 #+END_SRC
 
+*** Multiple-cursors
+#+BEGIN_SRC emacs-lisp 
+(setq mc/always-run-for-all t)
+#+END_SRC
 
 ** Language aspect
 *** Org
@@ -603,48 +611,93 @@ buffer is not visiting a file."
 
 ** Smart forward and backward
 #+BEGIN_SRC emacs-lisp 
-  (defun jmqu/test-backward-kill-word ()
-    "Smart kill word backward."
-    (interactive)
-    (backword-char))
-  (global-set-key [C-backspace]
-                  'jmqu/test-backward-kill-word)
-#+END_SRC
-
-
-
-#+BEGIN_SRC emacs-lisp 
   (defun jmqu/backward-kill-word ()
     "Smart kill word backward."
     (interactive)
-    (let* ((cp (point)) ;; save current point
-           (backword)   ;; define 
-           (end)        ;; define 
-           (space-pos)  ;; define
-           (backword-char (if (bobp) ;; save the character before current point
-                              "" ;; if buffer beginning
-                            (buffer-substring cp (- cp 1)))))
-      (if (equal (length backword-char) (string-width backword-char)) ;; if it is an Ascii character
-          (progn
-            (save-excursion
-              (setq backword (buffer-substring (point) (progn (forward-word -1) (point)))))
-            (setq ab/debug backword)
-            (save-excursion
-              (when (and backword          ;; when backword contains space
-                         (s-contains? " " backword))
-                (setq space-pos (ignore-errors (search-backward " ")))))
-            (save-excursion
-              (let* ((pos (ignore-errors (search-backward-regexp "\n")))
-                     (substr (when pos (buffer-substring pos cp))))
-                (when (or (and substr (s-blank? (s-trim substr)))
-                          (s-contains? "\n" backword))
-                  (setq end pos))))
-            (if end
-                (kill-region cp end)
-              (if space-pos
-                  (kill-region cp space-pos)
-                (backward-kill-word 1))))
-        (kill-region cp (- cp 1)))         ;; word is non-english word
-      ))
+    (require 'cl-lib)
+    (cond 
+     ((looking-back (rx word))
+      (backward-kill-word 1))
+     ((looking-back (rx blank))
+      (delete-horizontal-space t))
+     ((looking-back (rx punct))
+      (save-excursion
+        (cl-labels ((find-same (char cp)
+                               (if (equal char (char-before cp))
+                                   (find-same char (- cp 1))
+                                 cp)))
+          (kill-region (point)
+                       (find-same (char-before (point)) (point))))))
+     (t
+      (backward-delete-char 1))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp 
+  (defun jmqu/forward-kill-word ()
+    "Smart kill word forward."
+    (interactive)
+    (require 'cl-lib)
+    (cond 
+     ((looking-at (rx word))
+      (kill-word 1))
+     ((looking-at (rx blank))
+      (kill-region (point) 
+                   (progn
+                     (skip-chars-forward " \t")
+                     (constrain-to-field nil (point) t))))
+     ((looking-at (rx punct))
+      (save-excursion
+        (cl-labels ((find-same (char cp)
+                               (if (equal char (char-after cp))
+                                   (find-same char (+ cp 1))
+                                 cp)))
+          (kill-region (point)
+                       (find-same (char-after (point)) (point))))))
+     (t
+      (delete-char 1))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp 
+  (defun jmqu/backward-word ()
+    "Smart word backward."
+    (interactive)
+    (require 'cl-lib)
+    (cond 
+     ((looking-back (rx word))
+      (backward-word 1))
+     ((looking-back (rx blank))
+      (progn
+        (skip-chars-backward " \t")
+        (goto-char (constrain-to-field nil (point)))))
+     ((looking-back (rx punct))
+      (cl-labels ((find-same (char cp)
+                             (if (equal char (char-before cp))
+                                 (find-same char (- cp 1))
+                               cp)))
+        (goto-char (find-same (char-before (point)) (point)))))
+     (t
+      (backward-char 1))))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp 
+  (defun jmqu/forward-word ()
+    "Smart word forward."
+    (interactive)
+    (require 'cl-lib)
+    (cond 
+     ((looking-at (rx word))
+      (forward-word 1))
+     ((looking-at (rx blank))
+      (progn
+        (skip-chars-forward " \t")
+        (goto-char (constrain-to-field nil (point)))))
+     ((looking-at (rx punct))
+      (cl-labels ((find-same (char cp)
+                             (if (equal char (char-after cp))
+                                 (find-same char (+ cp 1))
+                               cp)))
+        (goto-char (find-same (char-after (point)) (point)))))
+     (t
+      (forward-char 1))))
 #+END_SRC
 
