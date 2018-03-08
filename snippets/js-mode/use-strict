@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# contributor: sancoder.q@gmail.com
+# name: strict
+# key: s
+# condition : (= (point) 2)
+# --
+
+"use strict";
+
