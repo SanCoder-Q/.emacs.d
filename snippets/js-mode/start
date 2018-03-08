@@ -2,7 +2,7 @@
 # contributor: sancoder.q@gmail.com
 # name: strict
 # key: 
-# condition : (= (point) 1)
+# condition: (and (= (point) 1) (not mark-active) (string= (file-name-extension buffer-file-name) "js"))
 # --
 
 "use strict";

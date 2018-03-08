@@ -2,7 +2,7 @@
 # contributor: sancoder.q@gmail.com
 # name: strict
 # key:
-# condition : (= (point) 1)
+# condition: (and (= (point) 1) (not mark-active))
 # --
 
 root = true

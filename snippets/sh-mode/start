@@ -2,6 +2,7 @@
 # contributor: sancoder.q@gmail.com
 # name: bash-header
 # key:
+# condition: (and (= (point) 1) (not mark-active))
 # --
 
 #!/bin/bash
