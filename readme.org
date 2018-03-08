@@ -633,7 +633,12 @@ buffer is not visiting a file."
     (require 'cl-lib)
     (cond 
      ((looking-back (rx word))
-      (backward-kill-word 1))
+      (save-excursion
+        (let ((cp (point)))
+          (progn
+            (skip-syntax-backward
+             (char-to-string (char-syntax (char-before))))
+            (kill-region (point) cp)))))
      ((looking-back (rx blank))
       (delete-horizontal-space t))
      ((looking-back (rx punct))
@@ -655,7 +660,12 @@ buffer is not visiting a file."
     (require 'cl-lib)
     (cond 
      ((looking-at (rx word))
-      (kill-word 1))
+      (save-excursion
+        (let ((cp (point)))
+          (progn
+            (skip-syntax-forward
+             (char-to-string (char-syntax (char-after))))
+            (kill-region cp (point))))))
      ((looking-at (rx blank))
       (kill-region (point) 
                    (progn
