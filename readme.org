@@ -690,7 +690,8 @@ buffer is not visiting a file."
     (require 'cl-lib)
     (cond 
      ((looking-back (rx word))
-      (backward-word 1))
+      (skip-syntax-backward
+               (char-to-string (char-syntax (char-before)))))
      ((looking-back (rx blank))
       (progn
         (skip-chars-backward " \t")
@@ -712,7 +713,8 @@ buffer is not visiting a file."
     (require 'cl-lib)
     (cond 
      ((looking-at (rx word))
-      (forward-word 1))
+      (skip-syntax-forward
+       (char-to-string (char-syntax (char-after)))))
      ((looking-at (rx blank))
       (progn
         (skip-chars-forward " \t")
