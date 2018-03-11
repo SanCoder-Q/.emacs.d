@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# contributor: sancoder.q@gmail.com
+# name: fish-header
+# key:
+# condition: (and (= (point) 1) (not mark-active))
+# --
+
+#!/usr/local/bin/fish
+
+set SOURCE_DIR (dirname (status -f))
+set ROOT_DIR $SOURCE_DIR/..

@@ -382,6 +382,9 @@ Emacs 2.5 需要单独安装 htmlize 来支持代码发布的语法高亮功能!
 以下会导致打开较大文件时加载时间过长
 #+BEGIN_SRC emacs-lisp
   ;; (add-to-list 'auto-mode-alist '("\\.json\\'" . web-mode))
+  (require 'flycheck) 
+  (flycheck-add-mode 'json-jsonlint 'json-mode)
+  (add-hook 'json-mode-hook 'flycheck-mode)
 #+END_SRC
 
 
@@ -467,6 +470,7 @@ Tern 是一款 Javascript 代码分析工具. Tern-mode 在后台打开 tern ser
 *** Fish
 #+BEGIN_SRC emacs-lisp 
   (add-hook 'fish-mode-hook '(lambda () (setq tab-width 2)))
+  (setq fish-indent-offset 2)
 #+END_SRC
 
 *** Graphviz Dot 

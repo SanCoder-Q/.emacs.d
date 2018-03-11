@@ -147,3 +147,6 @@
 
 ;; yasnippet
 (depends-on "yasnippet")
+
+;; json-mode
+(depends-on "json-mode")
