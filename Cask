@@ -150,3 +150,16 @@
 
 ;; json-mode
 (depends-on "json-mode")
+
+;; terraform-mode
+(depends-on "terraform-mode")
+
+;; typescript
+(depends-on "typescript-mode")
+
+;; tide for TypeScript
+(depends-on "tide")
+
+;; Docker
+(depends-on "dockerfile-mode")
+(depends-on "docker-compose-mode")
