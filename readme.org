@@ -18,74 +18,23 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
   - 描述文件: [[https://github.com/SanCoder-Q/.emacs.d/blob/master/init.el][init.el]]
 
 
-* General configuration
-- Initialization
-  + Cask loading <<cask-loading>>
-#+BEGIN_SRC emacs-lisp :tangle no :eval never
-  (require 'cask "/usr/local/Cellar/cask/0.7.2_1/cask.el")
-  (cask-initialize)
-  (require 'pallet)
-  (pallet-mode t)
-#+END_SRC
-
-  + Org config loading <<org-config-loading>>
-#+BEGIN_SRC emacs-lisp :tangle no :eval never
-  (require 'org)
-  (setq org-confirm-babel-evaluate nil)
-  (org-babel-load-file "~/.emacs.d/config.org")
-#+END_SRC
-
-- 开启 Emacs server 模式
-#+BEGIN_SRC emacs-lisp
-  (server-start)
-#+END_SRC
-
-- 配置可执行程序 Path
-#+BEGIN_SRC emacs-lisp 
-  (add-to-list 'exec-path "/usr/local/bin")
-  (setenv "PATH" (concat "/usr/local/bin:" (getenv "PATH")))
-#+END_SRC
-
-- 配置 Debug 模式
-#+BEGIN_SRC emacs-lisp 
-(setq debug-on-error nil)
-#+END_SRC
-
-- 编辑设置
-#+BEGIN_SRC emacs-lisp
-  ;;(global-subword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作两个 word
-  (global-superword-mode 1) ;; 将 camel case 和以 `-` 连接的字符看作一个 word
-  (delete-selection-mode 1) ;; 粘贴后取消选择2
-
-  (global-auto-revert-mode 1) ;; 当外部变更文档后自动更新当前文档
-  (electric-indent-mode t) ;; 文档自动缩进
-  (global-linum-mode t) ;; 显示行号
-
-  (setq-default auto-save-default nil ;; 关闭 Auto-save
-                auto-save-list-file-prefix nil ;; 停止创建 auto-save-list 文件夹
-                indent-tabs-mode nil ;; 使用空格代替 tab
-                ring-bell-function 'ignore ;; 关闭 alarm bell
-                make-backup-files nil) ;; 关闭自动创建备份文件
-
-  (setq kill-buffer-query-functions
-        (remq 'process-kill-buffer-query-function
-              kill-buffer-query-functions)) ;; 取消关闭文件时的确认
-
-  (require 'pager) ;; 使用 pager.el 代替系统的翻页, 需要在 key map 里替换
-  (require 'visual-regexp) ;; 启用 vr (带高亮的文本替换)
-
-
-  (when (eq system-type 'darwin) ;; Mac's ls doesn't support '--dired' and will throw an error
-    (require 'ls-lisp)
-    (setq ls-lisp-use-insert-directory-program nil))
-#+END_SRC
-
-
 * Style configuration
 #+BEGIN_SRC emacs-lisp
+  ;; (ocodo-svg-modelines-init) ;; 渲染 mode-line
+  ;; (smt/set-theme 'ocodo-mesh-aqua-smt) ;; 设置 mode-line 主题
+  (column-number-mode t) ;; 在 mode-line 显示当前列
+  (setq sml/theme 'dark) ;; 配置 mode-line 主题
+  (setq sml/no-confirm-load-theme t) ;; 避免每次启动的 prompt
+  (sml/setup)  ;; 启动 mode-line 插件 smart mode line
+
+  (global-linum-mode 1) ;; 显示行号
+
   (load-theme 'sanityinc-tomorrow-blue t) ;; 修改主题
   (set-frame-parameter (selected-frame) 'alpha '(85 . 60)) ;; 设置背景透明, 分别为 Emacs active 和 unactive 时的透明度
   (set-background-color "#000620") ;; 加深背景颜色 (为了使背景颜色应用到所有 mode 需要修改theme文件中的背景颜色)
+  (eval-after-load "linum"
+    '(set-face-attribute 'linum nil :background "#000620" :foreground "#eeeeee" :height 200))
+  (set-face-attribute 'fringe nil :background "#000620" :foreground "#000620")
   (set-default-font "Envy Code R") ;; 修改默认字体
   (set-face-attribute 'default nil :height 200) ;; 修改默认字体缩放大小
   (tool-bar-mode -1) ;; 关闭上方的工具栏
@@ -95,16 +44,13 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
   (setq split-width-threshold 1
         split-height-threshold nil) ;; 设置默认分屏为垂直分屏
 
-  ;; (ocodo-svg-modelines-init) ;; 渲染 mode-line
-  ;; (smt/set-theme 'ocodo-mesh-aqua-smt) ;; 设置 mode-line 主题
-  (column-number-mode t) ;; 在 mode-line 显示当前列
-  (setq sml/theme 'dark) ;; 配置 mode-line 主题
-  (setq sml/no-confirm-load-theme t) ;; 避免每次启动的 prompt
-  (sml/setup)  ;; 启动 mode-line 插件 smart mode line
-
   (on-screen-global-mode 1) ;; 翻页的事后加一条小黑线
   (setq on-screen-highlight-method 'narrow-line)
+  ;;(add-hook 'buffer-list-update-hook '(lambda () (toggle-truncate-lines 1))) ;; 默认关闭 line wrap
 
+  (delete-selection-mode 1) ;; 替换选中的文字
+
+  (setq make-backup-files nil) ;; 关闭自动备份
 #+END_SRC
 
 
@@ -147,6 +93,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 | C-/           | 'comment-line               | General   | Comment                                                    |
 | C-c C-r       | 'revert-buffer              | General   | Reload current file                                        |
 | C-c r         | 'vr-replace-whole-buffer    | General   | Visual regexp replace                                      |
+| C-M-l         | 'toggle-truncate-lines      | General   | Switch the line wrap                                       |
 | M-[           | 'pop-to-mark-command        | General   | Jump back to last marker                                   |
 | M-]           | 'unpop-to-mark-command      | General   | Jump forward to next marker                                |
 | C-a           | 'back-to-indentation        | General   | Jump to the first character of the line.                   |
@@ -198,6 +145,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 ** General
 *** Helm
 #+BEGIN_SRC emacs-lisp
+  (add-to-list 'exec-path "/usr/local/bin/") ;; for locate ag command
   (require 'helm-config)
   (helm-mode 1)
   (helm-autoresize-mode t)
@@ -206,6 +154,7 @@ Ever since I used Emacs, I was using the config template from my friend [[http:/
 *** Projectile
 #+BEGIN_SRC emacs-lisp
   (projectile-global-mode)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (helm-projectile-on)
 #+END_SRC
 
@@ -286,14 +235,14 @@ Complete anything. Emacs 自动补全插件.
   (setq org-use-sub-superscripts '{}) ;; 显式的使用A_{B}来表示B是A的角标
   (setq org-export-with-sub-superscripts '{}) ;; 显式的使用A_{B}来表示B是A的角标
   (setq-default org-cycle-emulate-tab 'white) ;; Tab 键仅在空白行中为输入 tab, 其他情况均为展开或关闭 section
-  (add-hook 'org-mode-hook 'visual-line-mode) ;; 回行
+  ;; (add-hook 'org-mode-hook 'visual-line-mode) ;; 回行
   (set-face-attribute 'org-level-1 nil :height 1.6 :bold t)
   (set-face-attribute 'org-level-2 nil :height 1.4 :bold t)
   (set-face-attribute 'org-level-3 nil :height 1.2 :bold t)
 #+END_SRC
 
 **** org block template
-#+NAME: block-tmpl
+#+NAME: block-tmplpp
 #+BEGIN_SRC emacs-lisp :var blockmap=block-alias :results output :tangle no :exports none :colnames nil
     (mapcar (lambda (l)
               (let* ((alias (car l))

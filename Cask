@@ -3,42 +3,6 @@
 (source org)
 
 (depends-on "async")
-(depends-on "cask")
-(depends-on "color-theme-sanityinc-tomorrow")
-(depends-on "company")
-(depends-on "company-coq")
-(depends-on "company-tern")
-(depends-on "csharp-mode")
-(depends-on "dash")
-(depends-on "editorconfig")
-(depends-on "expand-region")
-(depends-on "f")
-(depends-on "fish-mode")
-(depends-on "gist")
-(depends-on "helm")
-(depends-on "helm-ag")
-(depends-on "helm-core")
-(depends-on "helm-projectile")
-(depends-on "htmlize")
-(depends-on "js2-mode")
-(depends-on "magit")
-(depends-on "markdown-mode")
-(depends-on "multiple-cursors")
-(depends-on "on-screen")
-(depends-on "org-plus-contrib")
-(depends-on "ox-reveal")
-(depends-on "package-build")
-(depends-on "pager")
-(depends-on "pallet")
-(depends-on "projectile")
-(depends-on "s")
-(depends-on "scala-mode")
-(depends-on "shut-up")
-(depends-on "smart-mode-line")
-(depends-on "tern")
-(depends-on "web-mode")
-(depends-on "yaml-mode")
-;;;pallet-ignore
 
 ;; Cask & Pallet: Dependency management tools for outside and inside emacs
 (depends-on "cask")
@@ -115,7 +79,7 @@
 (depends-on "fish-mode")
 
 ;; mustache-mode
-(depends-on "mustache-mode" :git "https://github.com/mustache/emacs.git" :files ("*.el"))
+(depends-on "mustache-mode")
 
 ;; htmlize
 (depends-on "htmlize")
@@ -140,6 +104,7 @@
 
 ;; org-R
 (depends-on "ess")
+(depends-on "julia-mode")
 
 ;; pure script
 (depends-on "purescript-mode")
@@ -163,3 +128,6 @@
 ;; Docker
 (depends-on "dockerfile-mode")
 (depends-on "docker-compose-mode")
+
+;; toml-mode
+(depends-on "toml-mode")
